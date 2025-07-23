@@ -1,5 +1,6 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Account {
@@ -7,7 +8,7 @@ public class Account {
     private String password;
     private String ownerFirstName;
     private String ownerLastName;
-    private List<BankCard> cardList;
+    private List<BankCard> cardList = new ArrayList<>();
 
     private Account(String username, String password, String ownerFirstName, String ownerLastName) {
         this.username = username;

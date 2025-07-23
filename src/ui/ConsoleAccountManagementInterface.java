@@ -1,23 +1,31 @@
 package ui;
 
 import model.Account;
+import model.BankCard;
+import model.Currency;
 import service.BankAccountAuthenticationService;
 import service.BankAccountService;
+import service.BankCardService;
 import service.exception.InvalidPasswordException;
 import service.exception.NoAccountFoundWithProvidedUsernameException;
 import service.exception.UsernameInUseException;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class ConsoleAccountManagementInterface implements AccountManagementInterface {
     private final BankAccountAuthenticationService authenticationService;
     private final BankAccountService service;
+    private final BankCardService cardService;
     private final Scanner scanner = new Scanner(System.in);
 
-    public ConsoleAccountManagementInterface(BankAccountAuthenticationService authenticationService, BankAccountService service) {
+
+    public ConsoleAccountManagementInterface(BankAccountAuthenticationService authenticationService, BankAccountService service, BankCardService cardService) {
         this.authenticationService = authenticationService;
         this.service = service;
+        this.cardService = cardService;
     }
+
 
     @Override
     public void start() {
@@ -77,6 +85,115 @@ public class ConsoleAccountManagementInterface implements AccountManagementInter
 
     private void mainMenu(Account connectedAccount){
         System.out.println("Welcome to main menu, " + connectedAccount.getUsername());
+        while (true) {
+            System.out.println("1. List all cards\n2. Account details\n3. Logout\n4. Exit");
+            String userInput = readInput();
+            switch (userInput) {
+                case "1" -> listAllUserCards(connectedAccount);
+                case "2" -> accountDetails();
+                case "3" -> logout();
+                case "4" -> exit();
+                default -> wrongInput();
+            }
+        }
+    }
+
+    private void listAllUserCards(Account connectedAccount){
+        while (true){
+            List<BankCard> cardList = connectedAccount.getCardList();
+            if (cardList.isEmpty()){
+                System.out.println("You have no cards yet.");
+                while (true) {
+                    System.out.println("1. Create new card\n 2. Back");
+                    String userInput = readInput();
+                    switch (userInput) {
+                        case "1" -> createNewCard(connectedAccount);
+                        case "2" -> {
+                            return;
+                        }
+                        default -> wrongInput();
+                    }
+                }
+            } else {
+                while (true) {
+                    System.out.println("Type 'exit' to get back to main menu:");
+                    System.out.println("Choose your card: ");
+                    for (int i = 0; i < cardList.size(); i++){
+                        BankCard card = cardList.get(i);
+                        System.out.println(i + ". " + card.getCardNumber() + ": " + card.getMoneyAmount() + card.getCurrency());
+                    }
+
+                    String userInput = readInput().trim();
+                    if (userInput.equals("exit")) {
+                        return;
+                    }
+
+                    int userInputParsed = -1;
+
+                    try {
+                        userInputParsed = Integer.parseInt(userInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Choose value between 0 and " + (cardList.size() - 1));
+                        continue;
+                    }
+
+                    if (userInputParsed > cardList.size() - 1 || userInputParsed < 0) {
+                        wrongInput();
+                    } else {
+                        showCardDetails(cardList.get(userInputParsed));
+                    }
+                }
+
+
+            }
+        }
+    }
+
+    private void createNewCard(Account connectedAccount){
+        while (true) {
+            System.out.println("Type 'exit' to get back:");
+            System.out.println("Choose currency: ");
+            for (int i = 1; i <= Currency.values().length; i++){
+                System.out.println(i + ". " + Currency.values()[i - 1]);
+            }
+            String userInput = readInput().trim();
+            if (userInput.equals("exit")) {
+                return;
+            }
+
+            int userInputParsed = -1;
+
+            try {
+                userInputParsed = Integer.parseInt(userInput);
+            } catch (NumberFormatException e) {
+                System.out.println("Choose value between 1 and " + (Currency.values().length));
+                continue;
+            }
+
+            if (userInputParsed > Currency.values().length || userInputParsed < 0) {
+                wrongInput();
+            } else {
+                BankCard createdCard = cardService.addNewCard(connectedAccount, Currency.values()[userInputParsed - 1]);
+                if (createdCard != null) {
+                    System.out.println("Card created successfully!");
+                    return;
+                } else {
+                    unpredictedError();
+                }
+            }
+        }
+    }
+
+    private void showCardDetails(BankCard card){
+
+    }
+
+    private void accountDetails(){
+
+    }
+
+    private void logout(){
+
     }
 
     private void signUp(){

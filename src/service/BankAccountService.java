@@ -1,7 +1,11 @@
 package service;
 
 import model.Account;
+import model.BankCard;
+import model.Currency;
 import repository.AccountRepository;
+
+import java.util.Random;
 
 public class BankAccountService {
     private final AccountRepository repository;
@@ -10,13 +14,6 @@ public class BankAccountService {
         this.repository = repository;
     }
 
-    public Account createAccount(){
-        return null;
-    }
-
-    public Account changeAccountPassword(){
-        return null;
-    }
 
     public Account updateAccountDetails(){
         return null;
@@ -25,4 +22,6 @@ public class BankAccountService {
     public void deleteAccount(){
 
     }
+
+
 }

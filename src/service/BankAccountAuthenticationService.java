@@ -31,4 +31,8 @@ public class BankAccountAuthenticationService {
         Account savedAccount = repository.saveAccount(account);
         return savedAccount != null;
     }
+
+    public Account changeAccountPassword(){
+        return null;
+    }
 }

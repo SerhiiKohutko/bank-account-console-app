@@ -1,7 +1,10 @@
 import repository.AccountRepository;
+import repository.BankCardRepository;
 import repository.InMemoryAccountRepository;
+import repository.InMemoryBankCardRepository;
 import service.BankAccountAuthenticationService;
 import service.BankAccountService;
+import service.BankCardService;
 import ui.AccountManagementInterface;
 import ui.ConsoleAccountManagementInterface;
 
@@ -10,7 +13,9 @@ public class AccountMainController {
         AccountRepository accountRepository = new InMemoryAccountRepository();
         BankAccountAuthenticationService authenticationService = new BankAccountAuthenticationService(accountRepository);
         BankAccountService bankAccountService = new BankAccountService(accountRepository);
-        AccountManagementInterface accountManagementInterface = new ConsoleAccountManagementInterface(authenticationService, bankAccountService);
+        BankCardRepository cardRepository = new InMemoryBankCardRepository();
+        BankCardService cardService = new BankCardService(cardRepository);
+        AccountManagementInterface accountManagementInterface = new ConsoleAccountManagementInterface(authenticationService, bankAccountService, cardService);
         accountManagementInterface.start();
     }
 }
