@@ -5,6 +5,7 @@ import service.BankAccountAuthenticationService;
 import service.BankAccountService;
 import service.exception.InvalidPasswordException;
 import service.exception.NoAccountFoundWithProvidedUsernameException;
+import service.exception.UsernameInUseException;
 
 import java.util.Scanner;
 
@@ -39,16 +40,9 @@ public class ConsoleAccountManagementInterface implements AccountManagementInter
     private void login(){
         while (true) {
             System.out.println("Input your credentials:");
-            System.out.println("Login: ");
-            String login = readInput();
-            if (login.isEmpty() || login.isBlank()){
-                System.out.println("You should not leave login empty!");
-            }
-            System.out.println("Password: ");
-            String password = readInput();
-            if (password.isEmpty() || password.isBlank()){
-                System.out.println("You should not leave password empty!");
-            }
+            String login = readRequestedProperty("login");
+            String password = readRequestedProperty("password");
+
             Account authneticatedAccount = null;
 
             try {
@@ -58,7 +52,7 @@ public class ConsoleAccountManagementInterface implements AccountManagementInter
             } catch (InvalidPasswordException e) {
                 System.out.println("Invalid password! Try again!");
             } catch (Exception e) {
-                System.out.println("Unpredicted error occurred. Please, try again.");
+                unpredictedError();
             }
 
             if (authneticatedAccount == null) {
@@ -74,19 +68,72 @@ public class ConsoleAccountManagementInterface implements AccountManagementInter
                     }
                 }
             } else {
-                mainMenu();
+                mainMenu(authneticatedAccount);
             }
 
         }
 
     }
 
-    private void mainMenu(){
-        System.out.println("Welcome to main menu");
+    private void mainMenu(Account connectedAccount){
+        System.out.println("Welcome to main menu, " + connectedAccount.getUsername());
     }
 
     private void signUp(){
+        while (true) {
+            System.out.println("Input your credentials:");
+            String username = readRequestedProperty("username");
+            String firstName = readRequestedProperty("firstName");
+            String lastName = readRequestedProperty("lastName");
+            String password = passwordConfirmation();
 
+            Account account =
+                    new Account.BankAccountBuilder()
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .username(username)
+                    .password(password)
+                    .build();
+
+            boolean signUpResult = false;
+            try {
+                signUpResult = authenticationService.signUp(account);
+            } catch (UsernameInUseException e) {
+                System.out.println("Username is already in use. Try again");
+            } catch (Exception e) {
+                unpredictedError();
+            }
+
+            if (signUpResult) {
+                System.out.println("Account registered successfully!");
+                return;
+            }
+            else unpredictedError();
+        }
+    }
+
+    private String passwordConfirmation(){
+        while (true) {
+            String password = readRequestedProperty("password");
+            String passwordConfirm = readRequestedProperty("confirm password");
+            if (!password.equals(passwordConfirm)) {
+                System.out.println("Password don't match! Try again.");
+            } else {
+                return password;
+            }
+        }
+    }
+
+    private String readRequestedProperty(String propertyName){
+        while (true) {
+            System.out.println(propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1) + ": ");
+            String userInput = readInput();
+            if (userInput.isEmpty() || userInput.isBlank()) {
+                System.out.println("You should not leave " + propertyName + " empty!");
+            } else {
+                return userInput;
+            }
+        }
     }
 
     private void exit(){
@@ -95,6 +142,10 @@ public class ConsoleAccountManagementInterface implements AccountManagementInter
 
     private void wrongInput(){
         System.out.println("Wrong input! Try again.");
+    }
+
+    private void unpredictedError(){
+        System.out.println("Unpredicted error occurred. Please, try again.");
     }
 
     private String readInput(){

@@ -2,13 +2,18 @@ package repository;
 
 import model.Account;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class InMemoryAccountRepository implements AccountRepository{
+    private final Map<String, Account> accounts = new HashMap<>();
+    private long idCounter = 1;
 
     @Override
     public Account saveAccount(Account account) {
-        return null;
+        accounts.put(account.getUsername(), account);
+        return account;
     }
 
     @Override
@@ -33,6 +38,10 @@ public class InMemoryAccountRepository implements AccountRepository{
 
     @Override
     public Optional<Account> getAccountByUsername(String username) {
-        return Optional.empty();
+        return Optional.ofNullable(accounts.get(username));
+    }
+
+    public long getNextId(){
+        return idCounter++;
     }
 }

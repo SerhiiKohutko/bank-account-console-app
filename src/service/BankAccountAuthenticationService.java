@@ -4,6 +4,7 @@ import model.Account;
 import repository.AccountRepository;
 import service.exception.InvalidPasswordException;
 import service.exception.NoAccountFoundWithProvidedUsernameException;
+import service.exception.UsernameInUseException;
 
 public class BankAccountAuthenticationService {
     private final AccountRepository repository;
@@ -23,7 +24,11 @@ public class BankAccountAuthenticationService {
         return account;
     }
 
-    public boolean signUp(){
-        return true;
+    public boolean signUp(Account account) throws UsernameInUseException {
+        if (repository.getAccountByUsername(account.getUsername()).isPresent()){
+            throw new UsernameInUseException(account.getUsername());
+        }
+        Account savedAccount = repository.saveAccount(account);
+        return savedAccount != null;
     }
 }
